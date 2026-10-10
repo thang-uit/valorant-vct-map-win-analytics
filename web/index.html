@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Post-match VALORANT map-win probability analysis from VCT 2023-2024 data."
+    />
+    <link rel="icon" href="data:," />
+    <title>Round State / VALORANT Analytics</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Round State home">
+          <span class="brand-mark" aria-hidden="true">RS</span>
+          <span>ROUND STATE</span>
+        </a>
+        <div class="topbar-meta">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>POST-MATCH LAB</span>
+          <a href="https://github.com/thang-uit/valorant-vct-map-win-analytics" target="_blank" rel="noreferrer">SOURCE ↗</a>
+        </div>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <div class="eyebrow">VCT 2023 — 2024 / MAP WIN ANALYTICS</div>
+          <div class="intro-grid">
+            <div>
+              <h1 id="page-title">The round<br /><em>changes the map.</em></h1>
+            </div>
+            <div class="intro-copy">
+              <p>
+                A post-match view of how score, economy and agent composition
+                shape the estimated chance of winning a map after each round.
+              </p>
+              <p class="small-note" id="data-note">Loading experiment note…</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-strip" aria-label="Dataset summary">
+          <div class="stat-cell">
+            <span class="stat-label">MAPS TESTED</span>
+            <strong id="stat-maps">—</strong>
+            <span class="stat-detail">VCT 2024 holdout</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label">ROUND STATES</span>
+            <strong id="stat-samples">—</strong>
+            <span class="stat-detail">after round 3 onward</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-label">MODEL IN VIEW</span>
+            <strong class="stat-model">GRU</strong>
+            <span class="stat-detail">sequence memory</span>
+          </div>
+          <div class="stat-cell stat-accent">
+            <span class="stat-label">PUBLIC DEMO</span>
+            <strong>STATIC</strong>
+            <span class="stat-detail">GitHub Pages ready</span>
+          </div>
+        </section>
+
+        <section class="workspace" aria-labelledby="workspace-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">01 / MAP EXPLORER</div>
+              <h2 id="workspace-title">Read a completed map backwards.</h2>
+            </div>
+            <label class="select-wrap">
+              <span class="sr-only">Choose a map</span>
+              <select id="map-select" aria-label="Choose a map"></select>
+            </label>
+          </div>
+
+          <div class="explorer-grid">
+            <aside class="map-rail" aria-label="Maps in the demo">
+              <div class="rail-head">
+                <span>SELECTED MAPS</span>
+                <span id="map-count">—</span>
+              </div>
+              <div id="map-list" class="map-list"></div>
+            </aside>
+
+            <div class="analysis-panel">
+              <div class="match-header">
+                <div>
+                  <span class="match-kicker" id="match-map">MAP / —</span>
+                  <h3><span id="team-a">Team A</span> <span class="muted">vs</span> <span id="team-b">Team B</span></h3>
+                </div>
+                <div class="final-score" aria-label="Final map score">
+                  <span id="final-a">—</span><b>:</b><span id="final-b">—</span>
+                </div>
+              </div>
+
+              <div class="probability-row">
+                <div>
+                  <span class="match-kicker">AFTER CURRENT ROUND</span>
+                  <div class="probability-value"><span id="current-probability">—</span><small>%</small></div>
+                  <div class="probability-label"><span id="probability-team">Team A</span> estimated map-win probability</div>
+                </div>
+                <div class="round-readout">
+                  <span class="match-kicker">CURRENT STATE</span>
+                  <strong id="current-round">Round —</strong>
+                  <span id="current-score">— : —</span>
+                </div>
+              </div>
+
+              <div class="chart-frame">
+                <div class="chart-label chart-label-top">100%</div>
+                <div class="chart-label chart-label-mid">50%</div>
+                <div class="chart-label chart-label-bottom">0%</div>
+                <canvas id="probability-chart" aria-label="Map-win probability by round"></canvas>
+                <div id="chart-tooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
+              </div>
+              <div class="chart-caption">
+                <span>ROUND 03</span>
+                <span>ROUND-BY-ROUND ESTIMATE</span>
+                <span id="chart-end">—</span>
+              </div>
+
+              <div class="round-details">
+                <div class="detail-heading">
+                  <div>
+                    <div class="eyebrow">ROUND CONTEXT</div>
+                    <h4 id="round-title">Round —</h4>
+                  </div>
+                  <span id="change-pill" class="change-pill">—</span>
+                </div>
+                <div class="context-grid">
+                  <div class="context-team">
+                    <div class="team-line"><span class="team-dot team-dot-a"></span><strong id="context-team-a">Team A</strong></div>
+                    <div class="buy-line"><span id="buy-a">—</span><span id="loadout-a">—</span></div>
+                    <div class="credit-line"><span>Remaining credits</span><strong id="credits-a">—</strong></div>
+                    <div class="agent-list" id="agents-a"></div>
+                  </div>
+                  <div class="context-team">
+                    <div class="team-line"><span class="team-dot team-dot-b"></span><strong id="context-team-b">Team B</strong></div>
+                    <div class="buy-line"><span id="buy-b">—</span><span id="loadout-b">—</span></div>
+                    <div class="credit-line"><span>Remaining credits</span><strong id="credits-b">—</strong></div>
+                    <div class="agent-list" id="agents-b"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="model-section" aria-labelledby="model-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">02 / MODEL CHECK</div>
+              <h2 id="model-title">A deep model earns its place by comparison.</h2>
+            </div>
+            <p class="section-side-note">Lower Log Loss is better.<br />All metrics are from the 2024 holdout.</p>
+          </div>
+          <div class="model-table-wrap">
+            <table>
+              <thead>
+                <tr><th>MODEL</th><th>LOG LOSS</th><th>BRIER</th><th>ROC-AUC</th><th>ACCURACY</th></tr>
+              </thead>
+              <tbody id="model-table"></tbody>
+            </table>
+          </div>
+          <p class="table-note" id="model-note">—</p>
+        </section>
+
+        <section class="method-section" aria-labelledby="method-title">
+          <div class="method-number">03</div>
+          <div>
+            <div class="eyebrow">WHAT THIS IS</div>
+            <h2 id="method-title">A film-room instrument,<br /><em>not a live oracle.</em></h2>
+          </div>
+          <div class="method-copy">
+            <p>
+              Each point on the chart is generated after a round has finished.
+              The model receives the round history, current score, economy state,
+              map and five-agent compositions, then estimates whether Team A
+              will eventually win the map.
+            </p>
+            <p>
+              The web page is a static post-match simulation. It does not watch
+              a live game, recommend purchases, or claim that an agent caused a
+              win. Its practical use is to help an analyst find turning points
+              worth revisiting in a VOD.
+            </p>
+            <a class="text-link" id="source-link" href="#" target="_blank" rel="noreferrer">OPEN DATA SOURCE ↗</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>ROUND STATE / VALORANT VCT MAP-WIN ANALYTICS</span>
+        <span>BUILT FOR POST-MATCH REVIEW</span>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

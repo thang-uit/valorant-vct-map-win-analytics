@@ -1,0 +1,30 @@
+# Local data and downloaded archives
+RawData/
+*.zip
+*.csv
+
+# Local experiment artifacts
+outputs/
+models/
+*.pt
+*.pth
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Personal and report files stay outside the public repository
+*.docx
+*.pdf
+*.pptx
+
+# Operating-system files
+.DS_Store
+
+# Local browser and rendering artifacts
+.playwright-cli/
+output/
+
+# The website publishes a small derived JSON payload, not raw CSV data.
+!web/data/
+!web/data/demo.json
+
