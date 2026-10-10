@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from catboost import CatBoostClassifier
+from sklearn.calibration import calibration_curve
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -317,6 +318,19 @@ def main() -> None:
             }
         )
 
+    calibration_curves = {}
+    for name in ("Logistic Regression", "GRU + mean", "GRU + agent attention"):
+        expected, observed = calibration_curve(
+            y_test,
+            test_predictions[name],
+            n_bins=10,
+            strategy="quantile",
+        )
+        calibration_curves[name] = {
+            "predicted_probability": expected.tolist(),
+            "observed_frequency": observed.tolist(),
+        }
+
     # Keep the web payload small while retaining enough trajectories to explore.
     test_by_map: dict[str, list[tuple[dict, float]]] = {}
     for row, probability in zip(split.test, main_probabilities):
@@ -384,6 +398,7 @@ def main() -> None:
         },
         "models": results,
         "checkpoint_metrics": checkpoint_metrics,
+        "calibration_curves": calibration_curves,
         "main_model": "GRU + mean",
         "maps": demo_maps,
     }
