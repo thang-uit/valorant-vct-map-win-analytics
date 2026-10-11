@@ -14,7 +14,6 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
-
 # Năm cột này cùng nhau xác định một map cụ thể trong một loạt trận.
 KEY_COLUMNS = ["Tournament", "Stage", "Match Type", "Match Name", "Map"]
 
@@ -119,13 +118,9 @@ def _prepare_season(data_root: Path, season: int) -> pd.DataFrame:
     if scores.duplicated(KEY_COLUMNS).any():
         raise ValueError(f"Mùa {season} có khóa map bị trùng trong maps_scores.csv")
     # Map hòa không tạo được nhãn thắng/thua nên bị loại khỏi thí nghiệm.
-    scores = scores.loc[
-        scores["Team A Score"].ne(scores["Team B Score"])
-    ].copy()
+    scores = scores.loc[scores["Team A Score"].ne(scores["Team B Score"])].copy()
     # target=1 khi đội A thắng cả map, target=0 khi đội B thắng.
-    scores["target"] = (
-        scores["Team A Score"] > scores["Team B Score"]
-    ).astype("int64")
+    scores["target"] = (scores["Team A Score"] > scores["Team B Score"]).astype("int64")
 
     # Chỉ mang tên đội, điểm cuối và target sang bảng economy.
     score_columns = KEY_COLUMNS + [
@@ -252,13 +247,17 @@ def _prepare_season(data_root: Path, season: int) -> pd.DataFrame:
     wide = wide.loc[wide[numeric_columns].notna().all(axis=1)].copy()
     wide["season"] = season
     # map_id có thêm season để tránh trùng tên khóa giữa các mùa.
-    wide["map_id"] = wide[["season"] + KEY_COLUMNS].astype(str).agg(
-        lambda row: "|".join(row.tolist()), axis=1
+    wide["map_id"] = (
+        wide[["season"] + KEY_COLUMNS]
+        .astype(str)
+        .agg(lambda row: "|".join(row.tolist()), axis=1)
     )
     # match_group bỏ tên Map, dùng để giữ các map cùng một loạt trận trong một tập.
-    wide["match_group"] = wide[
-        ["season", "Tournament", "Stage", "Match Type", "Match Name"]
-    ].astype(str).agg(lambda row: "|".join(row.tolist()), axis=1)
+    wide["match_group"] = (
+        wide[["season", "Tournament", "Stage", "Match Type", "Match Name"]]
+        .astype(str)
+        .agg(lambda row: "|".join(row.tolist()), axis=1)
+    )
     wide["round_win_A"] = wide["round_win_A"].astype("int64")
     wide["round_win_B"] = wide["round_win_B"].astype("int64")
     return wide.reset_index(drop=True)

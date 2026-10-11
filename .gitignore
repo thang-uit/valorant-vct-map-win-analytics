@@ -11,6 +11,7 @@ models/
 __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
+catboost_info/
 
 # Personal and report files stay outside the public repository
 *.docx

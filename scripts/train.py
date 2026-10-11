@@ -38,7 +38,6 @@ from src.models import (  # noqa: E402
     evaluate_probabilities,
 )
 
-
 # Seed giúp các phép chia dữ liệu và khởi tạo ngẫu nhiên có thể lặp lại.
 SEED = 42
 # Chỉ dùng hai mùa đã kiểm tra khóa ghép: 2023 train/validation, 2024 test.
@@ -231,7 +230,11 @@ def main() -> None:
     print(f"Maps: {split.map_counts}")
     print(
         "Samples:",
-        {"train": len(split.train), "validation": len(split.validation), "test": len(split.test)},
+        {
+            "train": len(split.train),
+            "validation": len(split.validation),
+            "test": len(split.test),
+        },
     )
 
     # Tách nhãn y khỏi input; nhãn cuối map không được đưa vào history.
@@ -251,14 +254,13 @@ def main() -> None:
             StandardScaler(), LogisticRegression(max_iter=1000, C=0.5)
         ),
         "XGBoost": XGBClassifier(
-            n_estimators=180,
-            max_depth=4,
-            learning_rate=0.05,
-            subsample=0.9,
-            colsample_bytree=0.9,
-            eval_metric="logloss",
-            # ``approx`` is stable with the Homebrew XGBoost build on Apple
-            # Silicon for this feature matrix; ``hist`` can crash natively.
+            n_estimators=180,  # Số cây được huấn luyện lần lượt bằng boosting.
+            max_depth=4,  # Giới hạn độ sâu để tránh cây học quá chi tiết.
+            learning_rate=0.05,  # Mỗi cây đóng góp với hệ số 0,05.
+            subsample=0.9,  # Mỗi cây dùng ngẫu nhiên 90% mẫu train.
+            colsample_bytree=0.9,  # Mỗi cây dùng ngẫu nhiên 90% đặc trưng.
+            eval_metric="logloss",  # Đánh giá sai số của xác suất dự đoán.
+            # Giữ approx vì hist từng gây lỗi native trên bản Homebrew của máy.
             tree_method="approx",
             n_jobs=1,
             random_state=SEED,
@@ -283,7 +285,9 @@ def main() -> None:
         print(f"\nTraining {name}")
         model.fit(baseline_features.train, y_train)
         # predict_proba[:, 1] là xác suất lớp 1, tức Team A thắng map.
-        validation_probabilities = model.predict_proba(baseline_features.validation)[:, 1]
+        validation_probabilities = model.predict_proba(baseline_features.validation)[
+            :, 1
+        ]
         test_probabilities = model.predict_proba(baseline_features.test)[:, 1]
         test_predictions[name] = test_probabilities
         validation_metrics = evaluate_probabilities(
@@ -341,7 +345,6 @@ def main() -> None:
         )
 
         if not use_attention:
-            main_model = model
             main_probabilities = test_probabilities
 
     # Đánh giá riêng tại một vài mốc round để xem thông tin tăng dần có ích không.
@@ -364,15 +367,16 @@ def main() -> None:
     # Tạo dữ liệu cho calibration curve: xác suất dự đoán so với tỷ lệ thắng thật.
     calibration_curves = {}
     for name in ("Logistic Regression", "GRU + mean", "GRU + agent attention"):
-        expected, observed = calibration_curve(
+        # sklearn trả tỷ lệ thắng thật trước, xác suất dự đoán trung bình sau.
+        observed_frequency, predicted_probability = calibration_curve(
             y_test,
             test_predictions[name],
             n_bins=10,
             strategy="quantile",
         )
         calibration_curves[name] = {
-            "predicted_probability": expected.tolist(),
-            "observed_frequency": observed.tolist(),
+            "predicted_probability": predicted_probability.tolist(),
+            "observed_frequency": observed_frequency.tolist(),
         }
 
     # Giữ payload web nhỏ nhưng vẫn có đủ trajectory để người xem tương tác.
@@ -399,9 +403,9 @@ def main() -> None:
                     "score_A": row["score_A"],
                     "score_B": row["score_B"],
                     "probability": probability,
-                    "probability_change": None
-                    if previous is None
-                    else probability - previous,
+                    "probability_change": (
+                        None if previous is None else probability - previous
+                    ),
                     **row["economy"],
                 }
             )
@@ -430,7 +434,7 @@ def main() -> None:
             "It is not a live match prediction system."
         ),
         "source": {
-            "name": "Valorant Champion Tour 2021-2023 Data",
+            "name": "Valorant Champion Tour 2021-2026 Data",
             "url": "https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data",
             "seasons_used": list(SEASONS),
         },

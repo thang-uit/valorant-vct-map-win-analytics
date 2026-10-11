@@ -98,16 +98,11 @@ def build_baseline_features(
     map_vocab = _fit_vocab(train, "map")
     agent_vocab = _fit_agent_vocab(train)
     # Tạo tên cột để khi cần có thể truy nguyên từng phần của vector đầu vào.
-    names = [
-        f"current_{index}"
-        for index in range(11)
-    ] + [
-        f"mean_{index}"
-        for index in range(11)
-    ] + [
-        f"change_{index}"
-        for index in range(11)
-    ]
+    names = (
+        [f"current_{index}" for index in range(11)]
+        + [f"mean_{index}" for index in range(11)]
+        + [f"change_{index}" for index in range(11)]
+    )
     names += [f"map={value}" for value in sorted(map_vocab)]
     names += [f"agents_A={value}" for value in sorted(agent_vocab)]
     names += [f"agents_B={value}" for value in sorted(agent_vocab)]
@@ -124,7 +119,9 @@ def build_baseline_features(
     )
 
 
-def evaluate_probabilities(y_true: Iterable[int], probabilities: Iterable[float]) -> dict:
+def evaluate_probabilities(
+    y_true: Iterable[int], probabilities: Iterable[float]
+) -> dict:
     """Tính metric cho xác suất; Log Loss và Brier thấp hơn là tốt hơn."""
 
     # Đưa iterator về mảng số nguyên để sklearn xử lý thống nhất.

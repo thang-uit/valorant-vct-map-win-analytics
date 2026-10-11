@@ -1,203 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Post-match VALORANT map-win probability analysis from VCT 2023-2024 data."
-    />
-    <link rel="icon" href="data:," />
-    <title>Round State / VALORANT Analytics</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="description" content="Phân tích xác suất thắng map VALORANT sau từng round từ dữ liệu VCT 2023–2024." />
+    <meta property="og:title" content="Round State | VALORANT analytics" />
+    <meta property="og:description" content="Phòng phân tích sau trận cho dữ liệu VALORANT VCT." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23131618'/%3E%3Cpath d='M18 16h28v9H28v23h-10V16Z' fill='%23ec5b3d'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <title>Round State | VALORANT analytics</title>
   </head>
   <body>
-    <div class="page-shell">
+    <a class="skip-link" href="#main-content" data-i18n="skipToContent">Bỏ qua đến nội dung</a>
+    <div class="site-noise" aria-hidden="true"></div>
+    <div class="site-shell">
       <header class="topbar">
-        <a class="brand" href="./" aria-label="Round State home">
-          <span class="brand-mark" aria-hidden="true">RS</span>
-          <span>ROUND STATE</span>
-        </a>
-        <div class="topbar-meta">
-          <span class="live-dot" aria-hidden="true"></span>
-          <span>POST-MATCH LAB</span>
-          <a href="https://github.com/thang-uit/valorant-vct-map-win-analytics" target="_blank" rel="noreferrer">SOURCE ↗</a>
-        </div>
+        <a class="brand" href="./" aria-label="Round State home"><span class="brand-mark" aria-hidden="true">RS</span><span class="brand-copy">ROUND STATE <small>VCT / 24</small></span></a>
+        <nav class="primary-nav" aria-label="Primary navigation"><a class="nav-link active" href="#overview" data-i18n="navOverview">Tổng quan</a><a class="nav-link" href="#explorer" data-i18n="navExplorer">Map explorer</a><a class="nav-link" href="#models" data-i18n="navModels">Mô hình</a><a class="nav-link" href="#method" data-i18n="navMethod">Phương pháp</a></nav>
+        <div class="topbar-actions"><a class="source-link" id="top-source-link" href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noreferrer" data-i18n="source">Nguồn dữ liệu</a><button class="icon-button" id="theme-toggle" type="button" aria-label="Đổi giao diện" title="Đổi giao diện"><span class="theme-icon" aria-hidden="true">◐</span><span class="button-label" data-i18n="theme">Giao diện</span></button><div class="language-switch" role="group" aria-label="Language"><button type="button" class="language-button active" data-language="vi" aria-pressed="true">VI</button><button type="button" class="language-button" data-language="en" aria-pressed="false">EN</button></div></div>
       </header>
 
-      <main>
-        <section class="intro" aria-labelledby="page-title">
-          <div class="eyebrow">VCT 2023 — 2024 / MAP WIN ANALYTICS</div>
-          <div class="intro-grid">
-            <div>
-              <h1 id="page-title">The round<br /><em>changes the map.</em></h1>
-            </div>
-            <div class="intro-copy">
-              <p>
-                A post-match view of how score, economy and agent composition
-                shape the estimated chance of winning a map after each round.
-              </p>
-              <p class="small-note" id="data-note">Loading experiment note…</p>
-            </div>
-          </div>
-        </section>
+      <main id="main-content">
+        <div class="app-state loading-state" id="loading-state" role="status"><div class="loading-mark" aria-hidden="true"></div><p data-i18n="loading">Đang tải dữ liệu phân tích...</p></div>
+        <div class="app-state error-state" id="error-state" role="alert" hidden><span class="state-kicker" data-i18n="errorKicker">Không thể tải dữ liệu</span><h1 data-i18n="errorTitle">Dashboard chưa sẵn sàng</h1><p id="error-message"></p><button class="button button-primary" id="retry-button" type="button" data-i18n="retry">Thử lại</button></div>
 
-        <section class="stats-strip" aria-label="Dataset summary">
-          <div class="stat-cell">
-            <span class="stat-label">MAPS TESTED</span>
-            <strong id="stat-maps">—</strong>
-            <span class="stat-detail">VCT 2024 holdout</span>
-          </div>
-          <div class="stat-cell">
-            <span class="stat-label">ROUND STATES</span>
-            <strong id="stat-samples">—</strong>
-            <span class="stat-detail">after round 3 onward</span>
-          </div>
-          <div class="stat-cell">
-            <span class="stat-label">MODEL IN VIEW</span>
-            <strong class="stat-model">GRU</strong>
-            <span class="stat-detail">sequence memory</span>
-          </div>
-          <div class="stat-cell stat-accent">
-            <span class="stat-label">PUBLIC DEMO</span>
-            <strong>STATIC</strong>
-            <span class="stat-detail">GitHub Pages ready</span>
-          </div>
-        </section>
+        <div id="app-content" hidden>
+          <section class="hero reveal" aria-labelledby="page-title"><div class="hero-copy"><p class="eyebrow"><span class="eyebrow-index">00</span><span data-i18n="heroEyebrow">VCT / POST-MATCH LAB</span></p><h1 id="page-title" data-i18n="heroTitle">Đọc từng round.<br /><em>Hiểu cả map.</em></h1><p class="hero-description" data-i18n="heroDescription">Một phòng phân tích sau trận để xem điểm số, nền kinh tế và đội hình đặc vụ đã làm thay đổi xác suất thắng map như thế nào.</p><div class="hero-actions"><a class="button button-primary" href="#explorer" data-i18n="exploreCta">Mở map explorer <span aria-hidden="true">↘</span></a><a class="text-action" href="#method" data-i18n="readMethod">Xem phương pháp</a></div></div><aside class="hero-signal" aria-label="Experiment status"><div class="signal-topline"><span class="status-dot"></span><span data-i18n="experimentReady">EXPERIMENT READY</span><span class="signal-code">RS / 01</span></div><div class="signal-graphic" aria-hidden="true"><div class="signal-axis"></div><div class="signal-line signal-line-one"></div><div class="signal-line signal-line-two"></div><span class="signal-point point-one"></span><span class="signal-point point-two"></span><span class="signal-point point-three"></span></div><dl class="signal-stats"><div><dt data-i18n="signalModel">Mô hình chính</dt><dd id="hero-model">GRU + mean</dd></div><div><dt data-i18n="signalSplit">Tập kiểm tra</dt><dd id="hero-split">VCT 2024</dd></div><div><dt data-i18n="signalScope">Phạm vi</dt><dd id="hero-scope">—</dd></div></dl></aside></section>
 
-        <section class="workspace" aria-labelledby="workspace-title">
-          <div class="section-heading">
-            <div>
-              <div class="eyebrow">01 / MAP EXPLORER</div>
-              <h2 id="workspace-title">Read a completed map backwards.</h2>
-            </div>
-            <label class="select-wrap">
-              <span class="sr-only">Choose a map</span>
-              <select id="map-select" aria-label="Choose a map"></select>
-            </label>
-          </div>
+          <section class="stat-grid reveal" id="overview" aria-labelledby="overview-title"><div class="section-intro compact-intro"><p class="eyebrow"><span class="eyebrow-index">01</span><span data-i18n="overviewEyebrow">THE DATASET</span></p><h2 id="overview-title" data-i18n="overviewTitle">Một mùa giải, nhìn từ trạng thái của từng round.</h2></div><div class="stat-card"><span class="stat-label" data-i18n="statMaps">MAP KIỂM TRA</span><strong id="stat-maps">—</strong><span class="stat-detail" data-i18n="statMapsDetail">holdout VCT 2024</span></div><div class="stat-card"><span class="stat-label" data-i18n="statStates">TRẠNG THÁI ROUND</span><strong id="stat-samples">—</strong><span class="stat-detail" data-i18n="statStatesDetail">sau round 3 trở đi</span></div><div class="stat-card"><span class="stat-label" data-i18n="statRows">DÒNG DỮ LIỆU</span><strong id="stat-rows">—</strong><span class="stat-detail" data-i18n="statRowsDetail">economy + score + agents</span></div><div class="stat-card stat-card-accent"><span class="stat-label" data-i18n="statModel">MÔ HÌNH CHÍNH</span><strong id="stat-model">GRU</strong><span class="stat-detail" data-i18n="statModelDetail">ghi nhớ chuỗi thời gian</span></div></section>
 
-          <div class="explorer-grid">
-            <aside class="map-rail" aria-label="Maps in the demo">
-              <div class="rail-head">
-                <span>SELECTED MAPS</span>
-                <span id="map-count">—</span>
-              </div>
-              <div id="map-list" class="map-list"></div>
-            </aside>
+          <section class="explorer-section reveal" id="explorer" aria-labelledby="explorer-title"><div class="section-heading"><div class="section-intro"><p class="eyebrow"><span class="eyebrow-index">02</span><span data-i18n="explorerEyebrow">MAP EXPLORER</span></p><h2 id="explorer-title" data-i18n="explorerTitle">Xem lại một map theo từng điểm ngoặt.</h2><p class="section-description" data-i18n="explorerDescription">Chọn map, kéo đến round cần xem hoặc bật phát tự động để theo dõi xác suất thay đổi theo diễn biến trận.</p></div><div class="explorer-controls"><label class="field-label" for="map-filter" data-i18n="searchMaps">Tìm map hoặc đội</label><input id="map-filter" class="text-input" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Tìm theo map, đội..." /><label class="sr-only" for="map-select" data-i18n="selectMap">Chọn map</label><select id="map-select" class="select-input"></select></div></div>
+            <div class="explorer-layout"><aside class="map-rail" aria-label="Available maps"><div class="rail-heading"><span data-i18n="availableMaps">MAP TRONG DEMO</span><strong id="map-count">—</strong></div><div class="map-list" id="map-list"></div><p class="rail-footnote" data-i18n="mapRailNote">24 map đại diện được đưa vào payload demo để trang tải nhanh.</p></aside>
+              <article class="analysis-panel" aria-labelledby="match-map"><header class="match-header"><div><p class="match-kicker" id="match-map">MAP / —</p><h3><span id="team-a">Team A</span><span class="versus">vs</span><span id="team-b">Team B</span></h3></div><div class="final-score" aria-label="Final map score"><span id="final-a">—</span><b>:</b><span id="final-b">—</span></div></header><div class="probability-header"><div><p class="match-kicker" data-i18n="probabilityLabel">XÁC SUẤT THẮNG MAP</p><div class="probability-value"><span id="current-probability">—</span><small>%</small></div><p class="probability-caption"><span id="probability-team">Team A</span><span data-i18n="probabilityCaption">ước tính sau round hiện tại</span></p></div><div class="round-readout"><p class="match-kicker" data-i18n="currentState">TRẠNG THÁI HIỆN TẠI</p><strong id="current-round">Round —</strong><span id="current-score">— : —</span></div></div>
+                <div class="chart-card"><div class="chart-toolbar"><span class="chart-legend"><i class="legend-line"></i><span data-i18n="chartLegend">Xác suất Team A thắng map</span></span><span class="chart-hint" data-i18n="chartHint">Di chuột hoặc chạm vào đường biểu diễn</span></div><div class="chart-frame" id="probability-chart-frame"><div class="chart-label top">100%</div><div class="chart-label mid">50%</div><div class="chart-label bottom">0%</div><canvas id="probability-chart" aria-label="Map-win probability by round"></canvas><div id="chart-tooltip" class="chart-tooltip" role="status" aria-live="polite"></div></div><div class="chart-caption"><span data-i18n="chartStart">ROUND 03</span><span data-i18n="roundEstimate">ROUND-BY-ROUND ESTIMATE</span><span id="chart-end">—</span></div></div>
+                <div class="round-controls"><button class="play-button" id="play-toggle" type="button" aria-label="Phát diễn biến" data-i18n-aria-label="playRound"><span id="play-icon" aria-hidden="true">▶</span><span id="play-label" data-i18n="play">Phát diễn biến</span></button><label class="round-slider-wrap" for="round-slider"><span data-i18n="roundTimeline">DÒNG THỜI GIAN ROUND</span><output id="round-slider-value" for="round-slider">Round —</output><input id="round-slider" type="range" min="0" max="1" value="0" /></label></div>
+                <section class="round-context" aria-labelledby="round-title"><div class="context-heading"><div><p class="eyebrow" data-i18n="roundContext">ROUND CONTEXT</p><h4 id="round-title">Round —</h4></div><span id="change-pill" class="change-pill">—</span></div><div class="context-grid"><div class="context-team team-a-panel"><div class="team-line"><span class="team-marker"></span><strong id="context-team-a">Team A</strong><span class="team-role" data-i18n="teamA">Đội A</span></div><div class="buy-line"><span id="buy-a">—</span><strong id="loadout-a">—</strong></div><div class="credit-line"><span data-i18n="remainingCredits">Tiền còn lại</span><strong id="credits-a">—</strong></div><div class="agent-list" id="agents-a"></div></div><div class="context-team team-b-panel"><div class="team-line"><span class="team-marker"></span><strong id="context-team-b">Team B</strong><span class="team-role" data-i18n="teamB">Đội B</span></div><div class="buy-line"><span id="buy-b">—</span><strong id="loadout-b">—</strong></div><div class="credit-line"><span data-i18n="remainingCredits">Tiền còn lại</span><strong id="credits-b">—</strong></div><div class="agent-list" id="agents-b"></div></div></div></section>
+              </article></div></section>
 
-            <div class="analysis-panel">
-              <div class="match-header">
-                <div>
-                  <span class="match-kicker" id="match-map">MAP / —</span>
-                  <h3><span id="team-a">Team A</span> <span class="muted">vs</span> <span id="team-b">Team B</span></h3>
-                </div>
-                <div class="final-score" aria-label="Final map score">
-                  <span id="final-a">—</span><b>:</b><span id="final-b">—</span>
-                </div>
-              </div>
+          <section class="models-section reveal" id="models" aria-labelledby="models-title"><div class="section-heading model-heading"><div class="section-intro"><p class="eyebrow"><span class="eyebrow-index">03</span><span data-i18n="modelsEyebrow">MODEL CHECK</span></p><h2 id="models-title" data-i18n="modelsTitle">Mô hình học sâu phải được đặt cạnh baseline.</h2><p class="section-description" data-i18n="modelsDescription">Kết quả trên tập kiểm tra 2024. Log Loss và Brier Score càng thấp càng tốt.</p></div><div class="metric-callout"><span data-i18n="bestModel">BEST LOG LOSS</span><strong id="best-model-value">—</strong><small id="best-model-detail">—</small></div></div><div class="model-grid"><div class="table-panel"><div class="panel-heading"><span data-i18n="comparisonTable">SO SÁNH MÔ HÌNH</span><span data-i18n="testHoldout">2024 HOLDOUT</span></div><div class="model-table-wrap"><table><caption class="sr-only" data-i18n="modelTableCaption">So sánh các mô hình trên tập kiểm tra</caption><thead><tr><th scope="col" data-i18n="modelColumn">Mô hình</th><th scope="col">Log Loss</th><th scope="col">Brier</th><th scope="col">ROC-AUC</th><th scope="col" data-i18n="accuracy">Độ chính xác</th></tr></thead><tbody id="model-table"></tbody></table></div><p class="table-note" id="model-note">—</p></div><div class="checkpoint-panel"><div class="panel-heading"><span data-i18n="checkpoints">ĐỘ CHÍNH XÁC THEO MỐC ROUND</span><span data-i18n="checkpointNote">GRU + mean</span></div><div class="checkpoint-list" id="checkpoint-list"></div></div></div></section>
 
-              <div class="probability-row">
-                <div>
-                  <span class="match-kicker">AFTER CURRENT ROUND</span>
-                  <div class="probability-value"><span id="current-probability">—</span><small>%</small></div>
-                  <div class="probability-label"><span id="probability-team">Team A</span> estimated map-win probability</div>
-                </div>
-                <div class="round-readout">
-                  <span class="match-kicker">CURRENT STATE</span>
-                  <strong id="current-round">Round —</strong>
-                  <span id="current-score">— : —</span>
-                </div>
-              </div>
+          <section class="calibration-section reveal" aria-labelledby="calibration-title"><div class="section-heading"><div class="section-intro"><p class="eyebrow"><span class="eyebrow-index">04</span><span data-i18n="calibrationEyebrow">PROBABILITY QUALITY</span></p><h2 id="calibration-title" data-i18n="calibrationTitle">Xác suất tốt phải đáng tin, không chỉ đúng.</h2><p class="section-description" data-i18n="calibrationDescription">Calibration curve so sánh xác suất mô hình dự đoán với tần suất thắng quan sát được.</p></div><div class="calibration-note"><span class="calibration-key key-perfect"></span><span data-i18n="perfectCalibration">Hiệu chỉnh lý tưởng</span><span class="calibration-key key-model"></span><span data-i18n="modelCalibration">Mô hình</span></div></div><div class="calibration-card"><canvas id="calibration-chart" aria-label="Calibration curve comparison"></canvas><div id="calibration-legend" class="calibration-legend"></div></div></section>
 
-              <div class="chart-frame">
-                <div class="chart-label chart-label-top">100%</div>
-                <div class="chart-label chart-label-mid">50%</div>
-                <div class="chart-label chart-label-bottom">0%</div>
-                <canvas id="probability-chart" aria-label="Map-win probability by round"></canvas>
-                <div id="chart-tooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
-              </div>
-              <div class="chart-caption">
-                <span>ROUND 03</span>
-                <span>ROUND-BY-ROUND ESTIMATE</span>
-                <span id="chart-end">—</span>
-              </div>
+          <section class="method-section reveal" id="method" aria-labelledby="method-title"><div class="method-number">05</div><div class="section-intro"><p class="eyebrow" data-i18n="methodEyebrow">WHAT THIS IS</p><h2 id="method-title" data-i18n="methodTitle">Một công cụ xem lại trận đấu,<br /><em>không phải lời tiên tri live.</em></h2></div><div class="method-copy"><p data-i18n="methodParagraphOne">Mỗi điểm trên biểu đồ được tạo sau khi một round kết thúc. Mô hình nhận chuỗi lịch sử round, tỷ số, trạng thái kinh tế, map và đội hình năm đặc vụ, rồi ước tính Team A có thắng cả map hay không.</p><p data-i18n="methodParagraphTwo">Trang này là mô phỏng sau trận. Nó không theo dõi trận live, không khuyến nghị mua súng hay skill, và không khẳng định một đặc vụ là nguyên nhân của chiến thắng. Giá trị thực tế là giúp analyst tìm ra những thời điểm đáng mở lại trong VOD.</p><a class="text-action" id="source-link" href="https://www.kaggle.com/datasets/ryanluong1/valorant-champion-tour-2021-2023-data" target="_blank" rel="noreferrer" data-i18n="openSource">Mở nguồn dữ liệu ↗</a></div></section>
 
-              <div class="round-details">
-                <div class="detail-heading">
-                  <div>
-                    <div class="eyebrow">ROUND CONTEXT</div>
-                    <h4 id="round-title">Round —</h4>
-                  </div>
-                  <span id="change-pill" class="change-pill">—</span>
-                </div>
-                <div class="context-grid">
-                  <div class="context-team">
-                    <div class="team-line"><span class="team-dot team-dot-a"></span><strong id="context-team-a">Team A</strong></div>
-                    <div class="buy-line"><span id="buy-a">—</span><span id="loadout-a">—</span></div>
-                    <div class="credit-line"><span>Remaining credits</span><strong id="credits-a">—</strong></div>
-                    <div class="agent-list" id="agents-a"></div>
-                  </div>
-                  <div class="context-team">
-                    <div class="team-line"><span class="team-dot team-dot-b"></span><strong id="context-team-b">Team B</strong></div>
-                    <div class="buy-line"><span id="buy-b">—</span><span id="loadout-b">—</span></div>
-                    <div class="credit-line"><span>Remaining credits</span><strong id="credits-b">—</strong></div>
-                    <div class="agent-list" id="agents-b"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="model-section" aria-labelledby="model-title">
-          <div class="section-heading">
-            <div>
-              <div class="eyebrow">02 / MODEL CHECK</div>
-              <h2 id="model-title">A deep model earns its place by comparison.</h2>
-            </div>
-            <p class="section-side-note">Lower Log Loss is better.<br />All metrics are from the 2024 holdout.</p>
-          </div>
-          <div class="model-table-wrap">
-            <table>
-              <thead>
-                <tr><th>MODEL</th><th>LOG LOSS</th><th>BRIER</th><th>ROC-AUC</th><th>ACCURACY</th></tr>
-              </thead>
-              <tbody id="model-table"></tbody>
-            </table>
-          </div>
-          <p class="table-note" id="model-note">—</p>
-        </section>
-
-        <section class="method-section" aria-labelledby="method-title">
-          <div class="method-number">03</div>
-          <div>
-            <div class="eyebrow">WHAT THIS IS</div>
-            <h2 id="method-title">A film-room instrument,<br /><em>not a live oracle.</em></h2>
-          </div>
-          <div class="method-copy">
-            <p>
-              Each point on the chart is generated after a round has finished.
-              The model receives the round history, current score, economy state,
-              map and five-agent compositions, then estimates whether Team A
-              will eventually win the map.
-            </p>
-            <p>
-              The web page is a static post-match simulation. It does not watch
-              a live game, recommend purchases, or claim that an agent caused a
-              win. Its practical use is to help an analyst find turning points
-              worth revisiting in a VOD.
-            </p>
-            <a class="text-link" id="source-link" href="#" target="_blank" rel="noreferrer">OPEN DATA SOURCE ↗</a>
-          </div>
-        </section>
+          <section class="dictionary-section reveal" aria-labelledby="dictionary-title"><div class="dictionary-heading"><p class="eyebrow"><span class="eyebrow-index">06</span><span data-i18n="dictionaryEyebrow">FIELD GUIDE</span></p><h2 id="dictionary-title" data-i18n="dictionaryTitle">Các tín hiệu mô hình đọc sau mỗi round.</h2></div><div class="dictionary-grid" id="dictionary-grid"></div></section>
+        </div>
       </main>
 
-      <footer class="footer">
-        <span>ROUND STATE / VALORANT VCT MAP-WIN ANALYTICS</span>
-        <span>BUILT FOR POST-MATCH REVIEW</span>
-      </footer>
+      <footer class="footer"><span>ROUND STATE / VALORANT VCT MAP-WIN ANALYTICS</span><span data-i18n="footerText">Phân tích sau trận · VCT 2023–2024</span><a href="https://github.com/thang-uit/valorant-vct-map-win-analytics" target="_blank" rel="noreferrer" data-i18n="viewGithub">Xem mã nguồn ↗</a></footer>
     </div>
-    <script src="app.js"></script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>

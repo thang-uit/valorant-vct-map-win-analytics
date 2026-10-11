@@ -1,0 +1,2 @@
+.empty-chart { display: grid; height: 100%; place-items: center; color: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+.chart-frame canvas, .calibration-card canvas { display: block; }
